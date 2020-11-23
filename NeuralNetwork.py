@@ -35,3 +35,14 @@ class NeuralNetwork:
 
     def shape(self):
         return self.input_nodes, self.hidden_nodes, self.output_nodes
+    
+        # 0.1 is the mutation rate i.e. 10 %
+    def mutate(self, x):
+        if random.uniform(0,1) < 0.1:
+            offset = random.uniform(-0.5,0.5);
+            newx = x + offset
+            return newx
+        else:
+            return x
+    
+    #def crossover(self,)
