@@ -9,9 +9,12 @@ AI Project
 import pygame
 import random
 import sys
-import time    
+import time 
+import json   
 from Pipe import Pipe
 from Bird import Bird
+from NeuralNetwork import NeuralNetwork
+from GeneticAlgorithm import GeneticAlgorithm
 
 # Initialising the modules in pygame
 pygame.init()
@@ -34,11 +37,37 @@ base = pygame.image.load('Images/base.png')
 # Initializing main objects
 pipe = Pipe()
 bird = Bird()
+NN = NeuralNetwork(5,1,1)
 
 # Initialize score 
 score = 0
 score_font = pygame.font.SysFont('comicsansms',28, bold = True) 
  
+# Initialization of GA
+totalPopulation = 500
+activeBirds = []
+allBirds = []
+pipes = []
+counter = 0
+highScore = 0
+runBest = False
+'''
+# Created the population
+for i in range(totalPopulation):
+    bird_p = Bird()
+    activeBirds[i] = bird_p
+    allBirds[i] = bird_p
+'''
+# Main function that calls the NN and get the output of it.
+# Returns True if need to jump.
+def predict_action(x1, x2, x3, x4, x5):
+    x = [ x1,x2,x3,x4,x5]
+    Output = NN.predict(x)
+    print(Output)
+    if Output > 0.5:
+        return True
+    else:
+        return False
 
 game_over = False
 while not game_over:
@@ -53,7 +82,7 @@ while not game_over:
         # If exit is pressed the game will quit.
         if event.type == pygame.QUIT:            
             running = False
-        
+        '''
         if event.type == pygame.KEYDOWN:
             # Move up on space bar
             if event.key == pygame.K_SPACE:
@@ -63,6 +92,14 @@ while not game_over:
             # Re-enable gravity after space bar is lifted
             if event.key == pygame.K_SPACE:
                 bird.dy = 1       
+        '''
+        action = predict_action(bird.y, pipe.height, pipe.height+pipe.gap, pipe.x, pipe.dx)
+        
+        if action:
+            bird.dy = -2
+        else:
+            bird.dy = 1
+            
         
     # Updating game
     dt = clock.tick(fps) / frame_skip
@@ -87,6 +124,3 @@ while not game_over:
 #Quit the game, sys is used when game run on the Linux.
 pygame.quit()
 sys.exit()
-
-
-
