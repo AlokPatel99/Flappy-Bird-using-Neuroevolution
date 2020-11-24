@@ -1,56 +1,71 @@
-'''
-Just the functions are defined from the refrence of the Coding Train work,
-Need heavy changes inorder for the proper work.
-'''
-
 import numpy as np
-import random
+import pygame
+from Bird import Bird
 
 class GeneticAlgorithm:
-    def __init__(self, ):
-        
-        
-        
-     def resetGame(self):
-        self.counter = 0
-        if self.bestBird:
-            self.bestBird.score = 0
-        
-        self.pipes = []
-        
-    def nextGeneration(self):
-        self.resetGame()
-        self.normalizeFitness(self.allBirds)
-        self.allBirds = self.activeBirds
-        
-    def generate(self,oldBirds):
-        self.newBirds = []
-        for i in range(len(self.oldBirds)):
-            self.bird = self.poolSelection(self.oldBords)
-            self.newBirds[i] = self.bird
-        return self.newBirds
+    def __init__(self, population_size = 25):
+        self.bird_img = pygame.image.load('Images/redbird-upflap.png')
 
-    def normalizeFitness(self,birds):
-        for i in range(len(self.birds)):
-            self.birds[i].score = pow(self.birds[i].score, 2)
+        self.alive_birds = []
+        self.dead_birds = []
+
+        self.pop_size = population_size
+        self.gen_num = 1        
+        self.best_bird = None
+
+        self.initialize_population()
+
+    def initialize_population(self):
+        for i in range(self.pop_size):
+            self.alive_birds.append(Bird(self.bird_img))
+
+    def get_next_generation(self):
+        is_all_zero = self.calculate_fitness()
+        if is_all_zero:
+            self.initialize_population()
+        else:
+            for i in range(self.pop_size):
+                self.alive_birds.append(self.get_bird())
+
+        self.dead_birds = [] 
+        self.gen_num += 1
         
-        sum = 0 
-        for i in range(len(self.birds)):
-            sum += birds[i].score
-            
-        for i in range(len(self.birds)):
-            self.birds[i].fitness = self.birds[i].score/sum
-            
-    def poolSelection(self,birds):
-        self.index = 0
-        r = random.uniform(0,1)
-        while r>0:
-            r -= self.birds[self.index].fitness
-            self.index += 1 
+    # Calculates and normalizes the fitness score of birds
+    # Returns True if all the scores were 0, False otherwise
+    def calculate_fitness(self):
+        # Calculate total score from all birds and get best bird
+        total_score = 0
+        best_score = 0
+
+        for bird in self.dead_birds:
+            total_score += bird.score
+            if bird.score > best_score:
+                self.best_bird = bird 
+
+        if total_score == 0:
+            return True
+        # Normalize score and assign that as a fitness value
+        for bird in self.dead_birds:
+            bird.fitness = bird.score / total_score
+        return False
+
+    # Choosing a bird through a probability weighted by higher fitness
+    def get_bird(self):
+        idx = 0
+        r = np.random.uniform()
+        while r > 0:
+            r = r - self.dead_birds[idx].fitness
+            idx += 1
+        bird = self.dead_birds[idx-1]
         
-        self.index -= 1
-        return self.birds[self.index].copy()
-        
+        child = Bird(self.bird_img, neural_network = bird.nn)
+        child.mutate()
+        return child
+
+    def gen_dead(self):
+        return not len(self.alive_birds) > 0
+
+
     
         
         
