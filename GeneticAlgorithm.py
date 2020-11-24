@@ -42,15 +42,18 @@ class GeneticAlgorithm:
         best_score = 0
 
         for bird in self.dead_birds:
-            total_score += bird.score
-            if bird.score > best_score:
-                self.best_bird = bird 
+            #total_score += bird.score
+            total_score += bird.highest_live    #New added
+            #if bird.score > best_score:
+            if bird.highest_live > best_score:  #New added
+                self.best_bird = bird  
 
         if total_score == 0:
             return True
         # Normalize score and assign that as a fitness value
         for bird in self.dead_birds:
-            bird.fitness = bird.score / total_score
+            bird.fitness = bird.highest_live / total_score  #New added
+            #bird.fitness = bird.score / total_score
         return False
 
     # Choosing a bird through a probability weighted by higher fitness
