@@ -13,16 +13,17 @@ class Bird:
         self.y = 300
         
         self.velocity = 0
-        self.gravity = 0.15
+        self.gravity = 0.225
 
         # Neuroevolution parameters
         self.score = 0
         self.fitness = 0
+        self.highest_live = 0 #New added
 
         if neural_network is not None:
             self.nn = neural_network.copy()
         else:
-            self.nn = NeuralNetwork(4,8,1)
+            self.nn = NeuralNetwork(4,4,1)          #8 changed to 4 as hidden
 
     def display(self, screen):
         screen.blit(self.img, (self.x, self.y))
