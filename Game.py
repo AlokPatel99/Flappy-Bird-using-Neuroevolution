@@ -35,7 +35,7 @@ base = pygame.image.load('Images/base.png')
 
 # Initializing main objects
 pipe = Pipe()
-ga = GeneticAlgorithm(50) 
+ga = GeneticAlgorithm(250)  #Changed the population from 50 to 250. 
 
 # Initialize score 
 score = 0
@@ -52,7 +52,7 @@ while not game_over:
     screen.fill((0,0,0))
     screen.blit(background, (0,0))
     screen.blit(base, (0,400))
-    
+    '''
     # Keybindings
     for event in pygame.event.get():
         # If exit is pressed the game will quit.
@@ -63,7 +63,7 @@ while not game_over:
             # Move up on space bar
             if event.key == pygame.K_SPACE:
                 bird.jump() 
-    
+    '''
     # Choose action
     for bird in ga.alive_birds:
         if bird.predict_action(pipe):
@@ -80,6 +80,7 @@ while not game_over:
         if is_dead:
             bird.score = score
             dead_birds.append(bird)
+          
     # Update dead and alive bird arrays
     for bird in dead_birds:
         ga.alive_birds.remove(bird)
