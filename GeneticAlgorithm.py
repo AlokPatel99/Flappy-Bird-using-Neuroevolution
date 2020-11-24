@@ -20,6 +20,8 @@ class GeneticAlgorithm:
             self.alive_birds.append(Bird(self.bird_img))
 
     def get_next_generation(self):
+        # TODO: Fix this so new generation is based on some type of crossover mechanism
+        #       Also, see what to do if the entire generation scores 0 
         is_all_zero = self.calculate_fitness()
         if is_all_zero:
             self.initialize_population()
@@ -32,6 +34,8 @@ class GeneticAlgorithm:
         
     # Calculates and normalizes the fitness score of birds
     # Returns True if all the scores were 0, False otherwise
+    # TODO: Figure out what to do if the entire generation scores 0.
+    #       Currently essentially resets all progress if one gen. scores all 0.
     def calculate_fitness(self):
         # Calculate total score from all birds and get best bird
         total_score = 0
@@ -50,6 +54,7 @@ class GeneticAlgorithm:
         return False
 
     # Choosing a bird through a probability weighted by higher fitness
+    # TODO: Replace with some sort of crossover
     def get_bird(self):
         idx = 0
         r = np.random.uniform()
