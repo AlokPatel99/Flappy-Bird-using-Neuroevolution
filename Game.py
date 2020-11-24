@@ -7,10 +7,9 @@ AI Project
 
 # Imports
 import pygame
-import random
+import numpy as np
 import sys
 import time 
-import json   
 from Pipe import Pipe
 from Bird import Bird
 from NeuralNetwork import NeuralNetwork
@@ -31,46 +30,23 @@ collision_sound = pygame.mixer.Sound('Sounds/sfx_hit.wav')
  
 # Initializing background
 backgrounds = ('Images/background-day.png', 'Images/background-night.png')
-background = pygame.image.load(random.choice(backgrounds))  
+background = pygame.image.load(np.random.choice(backgrounds))  
 base = pygame.image.load('Images/base.png')
 
 # Initializing main objects
 pipe = Pipe()
-bird = Bird()
-NN = NeuralNetwork(5,1,1)
+ga = GeneticAlgorithm(50) 
 
 # Initialize score 
 score = 0
-score_font = pygame.font.SysFont('comicsansms',28, bold = True) 
- 
-# Initialization of GA
-totalPopulation = 500
-activeBirds = []
-allBirds = []
-pipes = []
-counter = 0
-highScore = 0
-runBest = False
-'''
-# Created the population
-for i in range(totalPopulation):
-    bird_p = Bird()
-    activeBirds[i] = bird_p
-    allBirds[i] = bird_p
-'''
-# Main function that calls the NN and get the output of it.
-# Returns True if need to jump.
-def predict_action(x1, x2, x3, x4, x5):
-    x = [ x1,x2,x3,x4,x5]
-    Output = NN.predict(x)
-    print(Output)
-    if Output > 0.5:
-        return True
-    else:
-        return False
+font = pygame.font.SysFont('comicsansms',28, bold = True) 
 
 game_over = False
 while not game_over:
+    # Check for generation change
+    if ga.gen_dead():
+        ga.get_next_generation()
+        score = 0
 
     # Display background
     screen.fill((0,0,0))
@@ -82,43 +58,49 @@ while not game_over:
         # If exit is pressed the game will quit.
         if event.type == pygame.QUIT:            
             running = False
-        '''
+        
         if event.type == pygame.KEYDOWN:
             # Move up on space bar
             if event.key == pygame.K_SPACE:
-                bird.dy = -2 
-        
-        if event.type == pygame.KEYUP:
-            # Re-enable gravity after space bar is lifted
-            if event.key == pygame.K_SPACE:
-                bird.dy = 1       
-        '''
-        action = predict_action(bird.y, pipe.height, pipe.height+pipe.gap, pipe.x, pipe.dx)
-        
-        if action:
-            bird.dy = -2
-        else:
-            bird.dy = 1
-            
-        
+                bird.jump() 
+    
+    # Choose action
+    for bird in ga.alive_birds:
+        if bird.predict_action(pipe):
+            bird.jump()
+
     # Updating game
     dt = clock.tick(fps) / frame_skip
-    score += pipe.update(bird, dt)
-    game_over = bird.update(pipe, dt)
+    score += pipe.update(dt)
+
+    # Update birds
+    dead_birds = []
+    for bird in ga.alive_birds:
+        is_dead = bird.update(pipe, dt)
+        if is_dead:
+            bird.score = score
+            dead_birds.append(bird)
+    # Update dead and alive bird arrays
+    for bird in dead_birds:
+        ga.alive_birds.remove(bird)
+        ga.dead_birds.append(bird)
     
     # Display
     pipe.display(screen)
-    bird.display(screen)
+    for bird in ga.alive_birds:
+        bird.display(screen)
 
-    score_display = score_font.render("Score: " + str(score), True, (0,0,0))
+    score_display = font.render("Score: " + str(score), True, (0,0,0))
+    gen_display = font.render("Generation: " + str(ga.gen_num), True, (0,0,0))
     screen.blit(score_display, (10,10))
+    screen.blit(gen_display, (10,40))
 
     pygame.display.update()
-
     if game_over:
-        pygame.mixer.Sound.play(collision_sound)
-        time.sleep(1)
-        pygame.quit()
+        # pygame.mixer.Sound.play(collision_sound)
+        # time.sleep(1)
+        # pygame.quit()
+        game_over = False
 
     
 #Quit the game, sys is used when game run on the Linux.

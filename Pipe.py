@@ -21,16 +21,15 @@ class Pipe:
         lower_pipe_height = 300 - self.height
         pygame.draw.rect(screen, self.colour, (self.x, self.height + self.gap, self.width, lower_pipe_height))
     
-    def update(self, bird, dt):
+    def update(self, dt):
         self.x += self.dx * dt
         
         if self.x <= -10:
             self.x = 288
             self.height = random.randint(50,300)
 
-            if bird.dy != 0:
-                pygame.mixer.Sound.play(self.score_sound)            
-                return 1 
+            pygame.mixer.Sound.play(self.score_sound)            
+            return 1 
         return 0 
 
         
