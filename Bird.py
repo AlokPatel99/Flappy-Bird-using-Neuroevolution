@@ -34,6 +34,7 @@ class Bird:
     # Updates position parameters and derivatives
     # Returns True if bird died, False if alive
     def update(self, pipe, dt):
+        self.highest_live += 1  #New added
         # Update velocity
         self.velocity += self.gravity
         # Update position
