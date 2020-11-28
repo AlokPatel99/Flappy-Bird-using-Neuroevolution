@@ -37,16 +37,32 @@ base = pygame.image.load('Images/base.png')
 pipe = Pipe()
 ga = GeneticAlgorithm(250)  #Changed the population from 50 to 250. 
 
-# Initialize score 
+# Initialize score and others
+gen = -1
 score = 0
 font = pygame.font.SysFont('comicsansms',28, bold = True) 
+
+# Below will solve the problem of the generation instant increase of 2 to 3 value.
+def generate_or_not(pipe):
+    if pipe.x < 70:              #30 is start of the bird, and end of bird is at 64.
+        return False            #So if pipe is within 70, then new gen will not occur.
+    else:
+        return True
 
 game_over = False
 while not game_over:
     # Check for generation change
     if ga.gen_dead():
-        ga.get_next_generation()
-        score = 0
+        # Below will solve the problem of the generation instant increase of 2 to 3 value.
+        if gen > 0:     #This for other generations.
+            if generate_or_not(pipe):
+                ga.get_next_generation()
+                gen = gen + 1
+                score = 0
+        else:           #This is just for the initialization.
+             ga.get_next_generation()
+             gen = gen + 1
+             score = 0
 
     # Display background
     screen.fill((0,0,0))
@@ -92,7 +108,7 @@ while not game_over:
         bird.display(screen)
 
     score_display = font.render("Score: " + str(score), True, (0,0,0))
-    gen_display = font.render("Generation: " + str(ga.gen_num), True, (0,0,0))
+    gen_display = font.render("Generation: " + str(gen), True, (0,0,0))     #ga.gen_num is replaced with gen.
     screen.blit(score_display, (10,10))
     screen.blit(gen_display, (10,40))
 
