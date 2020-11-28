@@ -29,7 +29,8 @@ class Bird:
         screen.blit(self.img, (self.x, self.y))
 
     def jump(self):
-        self.velocity = -2
+        if self.velocity>=0:    #When the bird moves down then only jump possible.
+            self.velocity = -2
     
     # Updates position parameters and derivatives
     # Returns True if bird died, False if alive
