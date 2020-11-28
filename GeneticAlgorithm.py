@@ -12,6 +12,7 @@ class GeneticAlgorithm:
         self.pop_size = population_size
         self.gen_num = 1        
         self.best_bird = None
+        self.all_best_score = 0     #New added
 
         self.initialize_population()
 
@@ -44,9 +45,11 @@ class GeneticAlgorithm:
         for bird in self.dead_birds:
             #total_score += bird.score
             total_score += bird.highest_live    #New added
+            #print(total_score)
             #if bird.score > best_score:
             if bird.highest_live > best_score:  #New added
-                self.best_bird = bird  
+                if bird.highest_live > self.all_best_score:     #New added
+                    self.best_bird = bird   
 
         if total_score == 0:
             return True
@@ -59,14 +62,15 @@ class GeneticAlgorithm:
     # Choosing a bird through a probability weighted by higher fitness
     # TODO: Replace with some sort of crossover
     def get_bird(self):
+        '''
         idx = 0
         r = np.random.uniform()
         while r > 0:
             r = r - self.dead_birds[idx].fitness
             idx += 1
         bird = self.dead_birds[idx-1]
-        
-        child = Bird(self.bird_img, neural_network = bird.nn)
+        '''#Experiment: Below bird is replaced with self.best_bird.
+        child = Bird(self.bird_img, neural_network = self.best_bird.nn)
         child.mutate()
         return child
 
