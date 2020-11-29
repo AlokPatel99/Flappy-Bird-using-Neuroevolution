@@ -25,7 +25,6 @@ class GeneticAlgorithm:
         return len(self.alive_birds) == 0
 
     def get_next_generation(self):
-        pygame.time.delay(100)
         self.calculate_fitness()
 
         for i in range(self.pop_size):
