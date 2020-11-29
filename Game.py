@@ -99,13 +99,13 @@ while not game_over:
         game_over = False
  
     #For limited generations, for analysis by plots.
-    if ga.gen_num > 100:
-        pygame.quit()
-        plt.figure(dpi=300)
-        plt.plot(list(ga.prev_gens_score.keys()),list(ga.prev_gens_score.values()))
-        plt.xlabel('Number of Generations')
-        plt.ylabel('Score')
-        plt.show()
+    # if ga.gen_num > 100:
+    #     pygame.quit()
+    #     plt.figure(dpi=300)
+    #     plt.plot(list(ga.prev_gens_score.keys()),list(ga.prev_gens_score.values()))
+    #     plt.xlabel('Number of Generations')
+    #     plt.ylabel('Score')
+    #     plt.show()
     
 #Quit the game, sys is used when game run on the Linux.
 pygame.quit()

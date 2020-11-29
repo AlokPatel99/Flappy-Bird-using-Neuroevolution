@@ -10,7 +10,7 @@ class GeneticAlgorithm:
         self.dead_birds = []
 
         self.pop_size = population_size
-        self.best_bird = None
+        self.best_bird = Bird(self.bird_img)
 
         self.gen_num = -1        
         self.prev_gens_score = {} 
@@ -21,42 +21,34 @@ class GeneticAlgorithm:
         for i in range(self.pop_size):
             self.alive_birds.append(Bird(self.bird_img))
 
+    def is_gen_dead(self):
+        return len(self.alive_birds) == 0
+
     def get_next_generation(self):
-        # TODO: Fix this so new generation is based on some type of crossover mechanism
-        #       Also, see what to do if the entire generation scores 0 
-        is_all_zero = self.calculate_fitness()
-        if is_all_zero:
-            self.initialize_population()
-        else:
-            for i in range(self.pop_size):
-                self.alive_birds.append(self.crossover_1())   #Changed as crossover added.(1 or 2 any)
+        pygame.time.delay(100)
+        self.calculate_fitness()
+
+        for i in range(self.pop_size):
+            self.alive_birds.append(self.crossover_1())   
 
         self.dead_birds = [] 
         self.gen_num += 1
         
     # Calculates and normalizes the fitness score of birds
-    # Returns True if all the scores were 0, False otherwise
-    # TODO: Figure out what to do if the entire generation scores 0.
-    #       Currently essentially resets all progress if one gen. scores all 0.
     def calculate_fitness(self):
-        # Calculate total score from all birds and get best bird
-        total_score = 0
-        best_score = 0
+        total_fitness = 0
 
         for bird in self.dead_birds:
-            total_score += bird.time_alive 
-            if bird.time_alive > best_score:  
+            bird.fitness = bird.time_alive
+            total_fitness += bird.fitness
+            if bird.score > self.best_bird.score:  
                 self.best_bird = bird  
 
-        if total_score == 0:
-            return True
-        # Normalize score and assign that as a fitness value
+        # Normalize bird fitness values
         for bird in self.dead_birds:
-            bird.fitness = bird.time_alive / total_score 
-        return False
+            bird.fitness /= total_fitness 
 
     # Choosing a bird through a probability weighted by higher fitness
-    # TODO: Replace with some sort of crossover
     def get_bird(self):
         idx = 0
         r = np.random.uniform()
@@ -68,52 +60,44 @@ class GeneticAlgorithm:
         parent = Bird(self.bird_img, neural_network = bird.nn)
         return parent
 
-    def gen_dead(self):
-        return not len(self.alive_birds) > 0
-
     #Below Function returns the child after the crossover(50%) and the mutation.
     def crossover_1(self):
         parent1 = self.get_bird()
+        p1_dims = parent1.nn.shape()
+
         parent2 = self.get_bird()
+        p2_dims = parent2.nn.shape()
+
         w_input_p1 = parent1.nn.weights['input']
         w_input_p2 = parent2.nn.weights['input']
         w_hidden_p1 = parent1.nn.weights['hidden']
         w_hidden_p2 = parent2.nn.weights['hidden']
 
-        # Making crossover, lower half of parent2 is assigned to parent1.
-        w_input_p1[int(parent1.nn.input_nodes/2):int(parent1.nn.input_nodes)] = w_input_p2[int(parent2.nn.input_nodes/2):int(parent2.nn.input_nodes)]
-        w_hidden_p1[int(parent1.nn.hidden_nodes/2):int(parent1.nn.hidden_nodes)] = w_hidden_p2[int(parent2.nn.hidden_nodes/2):int(parent2.nn.hidden_nodes)]
+        # First half of parent2 is assigned to parent1.
+        w_input_p1[p1_dims[0]//2:p1_dims[0]] = w_input_p2[p2_dims[0]//2:p2_dims[0]]
+        w_hidden_p1[p1_dims[1]//2:p1_dims[1]] = w_hidden_p2[p2_dims[1]//2:p2_dims[1]]
 
-        parent1.mutate()       #Mutation of the crossover.
+        parent1.mutate() 
         child = parent1
         return child
     
-    # Crossover of 75 to 25 %, where the parent-1 retains its 75% data and 25% 
-    # of the parent-2. So, 25% number of rows are replaced, in our case it is 
-    # last row if input, and last two rows of the hidden.
+    # Crossover of 75 to 25 %, where parent 1 retains 75% of its genes
     def crossover_2(self):
         parent1 = self.get_bird()
+        p1_dims = parent1.nn.shape()
+
         parent2 = self.get_bird()
+        p2_dims = parent2.nn.shape()
+
         w_input_p1 = parent1.nn.weights['input']
         w_input_p2 = parent2.nn.weights['input']
         w_hidden_p1 = parent1.nn.weights['hidden']
         w_hidden_p2 = parent2.nn.weights['hidden']
 
-        w_input_p1[int(0.75*parent1.nn.input_nodes):int(parent1.nn.input_nodes)] = w_input_p2[int(0.75*parent2.nn.input_nodes):int(parent2.nn.input_nodes)]
-        w_hidden_p1[int(0.75*parent1.nn.hidden_nodes):int(parent1.nn.hidden_nodes)] = w_hidden_p2[int(0.75*parent2.nn.hidden_nodes):int(parent2.nn.hidden_nodes)]
+        # Lower quarter of parent2 is assigned to parent1.
+        w_input_p1[p1_dims[0]//4:p1_dims[0]] = w_input_p2[p2_dims[0]//4:p2_dims[0]]
+        w_hidden_p1[p1_dims[1]//4:p1_dims[1]] = w_hidden_p2[p2_dims[1]//4:p2_dims[1]]
 
-        parent1.mutate()       
+        parent1.mutate() 
         child = parent1
         return child
-        
-        
-
-    
-        
-        
-            
-            
-        
-        
-            
-    
