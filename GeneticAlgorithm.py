@@ -27,7 +27,7 @@ class GeneticAlgorithm:
             self.initialize_population()
         else:
             for i in range(self.pop_size):
-                self.alive_birds.append(self.get_bird())
+                self.alive_birds.append(self.crossover_1())   #Changed as crossover added.(1 or 2 any)
 
         self.dead_birds = [] 
         self.gen_num += 1
@@ -66,13 +66,80 @@ class GeneticAlgorithm:
             idx += 1
         bird = self.dead_birds[idx-1]
         
-        child = Bird(self.bird_img, neural_network = bird.nn)
-        child.mutate()
-        return child
+       parent = Bird(self.bird_img, neural_network = bird.nn)
+        return parent
 
     def gen_dead(self):
         return not len(self.alive_birds) > 0
 
+    #Below Function returns the child after the crossover(50%) and the mutation.
+    def crossover_1(self):
+        parent1 = self.get_bird()
+        parent2 = self.get_bird()
+        w_input_p1 = parent1.nn.weights['input']
+        w_input_p2 = parent2.nn.weights['input']
+        w_hidden_p1 = parent1.nn.weights['hidden']
+        w_hidden_p2 = parent2.nn.weights['hidden']
+        '''
+        print('ip_p1')
+        print(w_input_p1)
+        #print(w_input_p1[0:2])
+        print('ip_p2')
+        print(w_input_p2)
+        #print(w_input_p2[2:4])
+        print('h_p1')
+        print(w_hidden_p1)
+        print('h_p2')
+        print(w_hidden_p2)
+        '''
+        # Making crossover, lower half of parent2 is assigned to parent1.
+        w_input_p1[int(parent1.nn.input_nodes/2):int(parent1.nn.input_nodes)] = w_input_p2[int(parent2.nn.input_nodes/2):int(parent2.nn.input_nodes)]
+        w_hidden_p1[int(parent1.nn.hidden_nodes/2):int(parent1.nn.hidden_nodes)] = w_hidden_p2[int(parent2.nn.hidden_nodes/2):int(parent2.nn.hidden_nodes)]
+        '''
+        print('updated_p1_ip')
+        print(w_input_p1)
+        print('updated_p1_h')
+        print(w_hidden_p1)
+        '''
+        parent1.mutate()       #Mutation of the crossover.
+        child = parent1
+        return child
+    
+    # Crossover of 75 to 25 %, where the parent-1 retains its 75% data and 25% 
+    # of the parent-2. So, 25% number of rows are replaced, in our case it is 
+    # last row if input, and last two rows of the hidden.
+    def crossover_2(self):
+        parent1 = self.get_bird()
+        parent2 = self.get_bird()
+        w_input_p1 = parent1.nn.weights['input']
+        w_input_p2 = parent2.nn.weights['input']
+        w_hidden_p1 = parent1.nn.weights['hidden']
+        w_hidden_p2 = parent2.nn.weights['hidden']
+        '''
+        print('ip_p1')
+        print(w_input_p1)
+        #print(w_input_p1[0:2])
+        print('ip_p2')
+        print(w_input_p2)
+        #print(w_input_p2[2:4])
+        print('h_p1')
+        print(w_hidden_p1)
+        print('h_p2')
+        print(w_hidden_p2)
+        '''
+        w_input_p1[int(0.75*parent1.nn.input_nodes):int(parent1.nn.input_nodes)] = w_input_p2[int(0.75*parent2.nn.input_nodes):int(parent2.nn.input_nodes)]
+        w_hidden_p1[int(0.75*parent1.nn.hidden_nodes):int(parent1.nn.hidden_nodes)] = w_hidden_p2[int(0.75*parent2.nn.hidden_nodes):int(parent2.nn.hidden_nodes)]
+        '''
+        print('updated_p1_ip')
+        print(w_input_p1)
+        print('updated_p1_h')
+        print(w_hidden_p1)
+        '''
+        parent1.mutate()       #Mutation of the crossover.
+        child = parent1
+        return child
+        
+        
 
     
         
