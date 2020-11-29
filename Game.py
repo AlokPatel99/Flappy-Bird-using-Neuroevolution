@@ -46,12 +46,13 @@ game_over = False
 while not game_over:
     pygame.event.get()
     # Check for generation change
-    if ga.gen_dead():
+    if ga.is_gen_dead():
         if pipe.x < bird.x + bird.width or ga.gen_num == -1:
             ga.get_next_generation()
             ga.prev_gens_score[ga.gen_num] = score
             print('Generation: {}\nScore: {}\n'.format(ga.gen_num, score))
             score = 0
+            print("BEST BIRD: {}".format(ga.best_bird.score))
 
     # Display background
     screen.fill((0,0,0))
@@ -101,7 +102,7 @@ while not game_over:
     if ga.gen_num > 100:
         pygame.quit()
         plt.figure(dpi=300)
-        plt.plot(ga.prev_gens_score.keys(),ga.prev_gens_score.values())
+        plt.plot(list(ga.prev_gens_score.keys()),list(ga.prev_gens_score.values()))
         plt.xlabel('Number of Generations')
         plt.ylabel('Score')
         plt.show()

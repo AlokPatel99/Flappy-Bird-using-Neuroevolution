@@ -63,6 +63,7 @@ class Bird:
     # Returns True if need to jump.
     def predict_action(self, pipe):
         inputs = []
+        # Inputs divided by max value to normalize
         inputs.append(self.y / 400)
         inputs.append(pipe.height / 400)
         inputs.append(np.maximum(0, pipe.x / 300))
