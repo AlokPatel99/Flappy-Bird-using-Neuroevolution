@@ -23,7 +23,7 @@ class Bird:
         if neural_network is not None:
             self.nn = neural_network.copy()
         else:
-            self.nn = NeuralNetwork(4,4,1)          #8 changed to 4 as hidden
+            self.nn = NeuralNetwork(4,8,1)          #8 changed to 4 as hidden
 
     def display(self, screen):
         screen.blit(self.img, (self.x, self.y))
