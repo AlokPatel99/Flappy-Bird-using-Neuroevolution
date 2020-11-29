@@ -10,6 +10,7 @@ import pygame
 import numpy as np
 import sys
 import time 
+import matplotlib.pyplot as plt
 from Pipe import Pipe
 from Bird import Bird
 from NeuralNetwork import NeuralNetwork
@@ -37,33 +38,43 @@ base = pygame.image.load('Images/base.png')
 pipe = Pipe()
 ga = GeneticAlgorithm(250)  #Changed the population from 50 to 250. 
 
-# Initialize score 
+# Initialize score and other
+gen = -1
+gen_store = []
+score_store = [] 
 score = 0
 font = pygame.font.SysFont('comicsansms',28, bold = True) 
+
+# Below will solve the problem of the generation instant increase of 2 to 3 value.
+def generate_or_not(pipe):
+    if pipe.x < 70:              #30 is start of the bird, and end of bird is at 64.
+        return False            #So if pipe is within 70, then new gen will not occur.
+    else:
+        return True
 
 game_over = False
 while not game_over:
     # Check for generation change
     if ga.gen_dead():
-        ga.get_next_generation()
-        score = 0
+        # Below will solve the problem of the generation instant increase of 2 to 3 value.
+        if gen >= 0:     #This for other generations.
+            if generate_or_not(pipe):
+                ga.get_next_generation()
+                gen_store = gen_store + [gen]
+                score_store = score_store + [score]
+                print('For generation-'+str(gen)+', the score is: '+str(score))
+                gen = gen + 1
+                score = 0
+        else:           #This is just for the initialization.
+             ga.get_next_generation()
+             gen = gen + 1          #This will reset the gen to 0.
+             score = 0
 
     # Display background
     screen.fill((0,0,0))
     screen.blit(background, (0,0))
     screen.blit(base, (0,400))
-    '''
-    # Keybindings
-    for event in pygame.event.get():
-        # If exit is pressed the game will quit.
-        if event.type == pygame.QUIT:            
-            running = False
-        
-        if event.type == pygame.KEYDOWN:
-            # Move up on space bar
-            if event.key == pygame.K_SPACE:
-                bird.jump() 
-    '''
+
     # Choose action
     for bird in ga.alive_birds:
         if bird.predict_action(pipe):
@@ -102,7 +113,15 @@ while not game_over:
         # time.sleep(1)
         # pygame.quit()
         game_over = False
-
+ 
+    #For limited generations, for analysis by plots.
+    if gen > 100:
+        pygame.quit()
+        plt.figure(dpi=300)
+        plt.plot(gen_store,score_store)
+        plt.xlabel('Number of Generations')
+        plt.ylabel('Score')
+        plt.show()
     
 #Quit the game, sys is used when game run on the Linux.
 pygame.quit()
