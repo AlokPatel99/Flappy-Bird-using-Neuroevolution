@@ -44,6 +44,7 @@ font = pygame.font.SysFont('Helvetica',28, bold = True)
 
 game_over = False
 while not game_over:
+    pygame.event.get()
     # Check for generation change
     if ga.gen_dead():
         if pipe.x < bird.x + bird.width or ga.gen_num == -1:
