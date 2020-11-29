@@ -36,39 +36,21 @@ base = pygame.image.load('Images/base.png')
 
 # Initializing main objects
 pipe = Pipe()
-ga = GeneticAlgorithm(250)  #Changed the population from 50 to 250. 
+ga = GeneticAlgorithm(250)  
 
 # Initialize score and other
-gen = -1
-gen_store = []
-score_store = [] 
 score = 0
-font = pygame.font.SysFont('comicsansms',28, bold = True) 
-
-# Below will solve the problem of the generation instant increase of 2 to 3 value.
-def generate_or_not(pipe):
-    if pipe.x < 70:              #30 is start of the bird, and end of bird is at 64.
-        return False            #So if pipe is within 70, then new gen will not occur.
-    else:
-        return True
+font = pygame.font.SysFont('Helvetica',28, bold = True) 
 
 game_over = False
 while not game_over:
     # Check for generation change
     if ga.gen_dead():
-        # Below will solve the problem of the generation instant increase of 2 to 3 value.
-        if gen >= 0:     #This for other generations.
-            if generate_or_not(pipe):
-                ga.get_next_generation()
-                gen_store = gen_store + [gen]
-                score_store = score_store + [score]
-                print('For generation-'+str(gen)+', the score is: '+str(score))
-                gen = gen + 1
-                score = 0
-        else:           #This is just for the initialization.
-             ga.get_next_generation()
-             gen = gen + 1          #This will reset the gen to 0.
-             score = 0
+        if pipe.x < bird.x + bird.width or ga.gen_num == -1:
+            ga.get_next_generation()
+            ga.prev_gens_score[ga.gen_num] = score
+            print('Generation: {}\nScore: {}\n'.format(ga.gen_num, score))
+            score = 0
 
     # Display background
     screen.fill((0,0,0))
@@ -102,8 +84,8 @@ while not game_over:
     for bird in ga.alive_birds:
         bird.display(screen)
 
-    score_display = font.render("Score: " + str(score), True, (0,0,0))
-    gen_display = font.render("Generation: " + str(ga.gen_num), True, (0,0,0))
+    score_display = font.render("Score: %d" % score, True, (0,0,0))
+    gen_display = font.render("Generation: %d" % (ga.gen_num + 1), True, (0,0,0))
     screen.blit(score_display, (10,10))
     screen.blit(gen_display, (10,40))
 
@@ -115,10 +97,10 @@ while not game_over:
         game_over = False
  
     #For limited generations, for analysis by plots.
-    if gen > 100:
+    if ga.gen_num > 100:
         pygame.quit()
         plt.figure(dpi=300)
-        plt.plot(gen_store,score_store)
+        plt.plot(ga.prev_gens_score.keys(),ga.prev_gens_score.values())
         plt.xlabel('Number of Generations')
         plt.ylabel('Score')
         plt.show()

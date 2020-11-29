@@ -10,8 +10,10 @@ class GeneticAlgorithm:
         self.dead_birds = []
 
         self.pop_size = population_size
-        self.gen_num = 1        
         self.best_bird = None
+
+        self.gen_num = -1        
+        self.prev_gens_score = {} 
 
         self.initialize_population()
 
@@ -42,18 +44,15 @@ class GeneticAlgorithm:
         best_score = 0
 
         for bird in self.dead_birds:
-            #total_score += bird.score
-            total_score += bird.highest_live    #New added
-            #if bird.score > best_score:
-            if bird.highest_live > best_score:  #New added
+            total_score += bird.time_alive 
+            if bird.time_alive > best_score:  
                 self.best_bird = bird  
 
         if total_score == 0:
             return True
         # Normalize score and assign that as a fitness value
         for bird in self.dead_birds:
-            bird.fitness = bird.highest_live / total_score  #New added
-            #bird.fitness = bird.score / total_score
+            bird.fitness = bird.time_alive / total_score 
         return False
 
     # Choosing a bird through a probability weighted by higher fitness
@@ -66,7 +65,7 @@ class GeneticAlgorithm:
             idx += 1
         bird = self.dead_birds[idx-1]
         
-       parent = Bird(self.bird_img, neural_network = bird.nn)
+        parent = Bird(self.bird_img, neural_network = bird.nn)
         return parent
 
     def gen_dead(self):
@@ -80,27 +79,11 @@ class GeneticAlgorithm:
         w_input_p2 = parent2.nn.weights['input']
         w_hidden_p1 = parent1.nn.weights['hidden']
         w_hidden_p2 = parent2.nn.weights['hidden']
-        '''
-        print('ip_p1')
-        print(w_input_p1)
-        #print(w_input_p1[0:2])
-        print('ip_p2')
-        print(w_input_p2)
-        #print(w_input_p2[2:4])
-        print('h_p1')
-        print(w_hidden_p1)
-        print('h_p2')
-        print(w_hidden_p2)
-        '''
+
         # Making crossover, lower half of parent2 is assigned to parent1.
         w_input_p1[int(parent1.nn.input_nodes/2):int(parent1.nn.input_nodes)] = w_input_p2[int(parent2.nn.input_nodes/2):int(parent2.nn.input_nodes)]
         w_hidden_p1[int(parent1.nn.hidden_nodes/2):int(parent1.nn.hidden_nodes)] = w_hidden_p2[int(parent2.nn.hidden_nodes/2):int(parent2.nn.hidden_nodes)]
-        '''
-        print('updated_p1_ip')
-        print(w_input_p1)
-        print('updated_p1_h')
-        print(w_hidden_p1)
-        '''
+
         parent1.mutate()       #Mutation of the crossover.
         child = parent1
         return child
@@ -115,27 +98,11 @@ class GeneticAlgorithm:
         w_input_p2 = parent2.nn.weights['input']
         w_hidden_p1 = parent1.nn.weights['hidden']
         w_hidden_p2 = parent2.nn.weights['hidden']
-        '''
-        print('ip_p1')
-        print(w_input_p1)
-        #print(w_input_p1[0:2])
-        print('ip_p2')
-        print(w_input_p2)
-        #print(w_input_p2[2:4])
-        print('h_p1')
-        print(w_hidden_p1)
-        print('h_p2')
-        print(w_hidden_p2)
-        '''
+
         w_input_p1[int(0.75*parent1.nn.input_nodes):int(parent1.nn.input_nodes)] = w_input_p2[int(0.75*parent2.nn.input_nodes):int(parent2.nn.input_nodes)]
         w_hidden_p1[int(0.75*parent1.nn.hidden_nodes):int(parent1.nn.hidden_nodes)] = w_hidden_p2[int(0.75*parent2.nn.hidden_nodes):int(parent2.nn.hidden_nodes)]
-        '''
-        print('updated_p1_ip')
-        print(w_input_p1)
-        print('updated_p1_h')
-        print(w_hidden_p1)
-        '''
-        parent1.mutate()       #Mutation of the crossover.
+
+        parent1.mutate()       
         child = parent1
         return child
         

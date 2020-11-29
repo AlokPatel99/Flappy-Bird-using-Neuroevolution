@@ -18,7 +18,7 @@ class Bird:
         # Neuroevolution parameters
         self.score = 0
         self.fitness = 0
-        self.highest_live = 0 #New added
+        self.time_alive = 0
 
         if neural_network is not None:
             self.nn = neural_network.copy()
@@ -35,10 +35,9 @@ class Bird:
     # Updates position parameters and derivatives
     # Returns True if bird died, False if alive
     def update(self, pipe, dt):
-        self.highest_live += 1  #New added
-        # Update velocity
+        self.time_alive += 1  
+        
         self.velocity += self.gravity
-        # Update position
         self.y += self.velocity * dt
 
         if self.y <= 0:
