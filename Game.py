@@ -73,6 +73,9 @@ while not game_over:
             elif btn_pos[0]-btn_gap <= mouse_x <= btn_pos[0]-btn_gap+btn_size[0] and btn_pos[1] <= mouse_y <= btn_pos[1]+btn_size[1]:
                 if training_speed > 1:
                     training_speed -= 1
+        if event.type == pygame.KEYDOWN:
+            if pygame.key.name(event.key) == "s":
+                ga.save_csv()
     
     for i in range(training_speed):
         # Check for generation change
@@ -130,15 +133,6 @@ while not game_over:
         # time.sleep(1)
         # pygame.quit()
         game_over = False
- 
-    #For limited generations, for analysis by plots.
-    # if ga.gen_num > 100:
-    #     pygame.quit()
-    #     plt.figure(dpi=300)
-    #     plt.plot(list(ga.prev_gens_score.keys()),list(ga.prev_gens_score.values()))
-    #     plt.xlabel('Number of Generations')
-    #     plt.ylabel('Score')
-    #     plt.show()
     
 #Quit the game, sys is used when game run on the Linux.
 pygame.quit()

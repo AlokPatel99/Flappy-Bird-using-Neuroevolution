@@ -1,5 +1,7 @@
 import numpy as np
 import pygame
+import csv
+from copy import deepcopy
 from Bird import Bird
 
 class GeneticAlgorithm:
@@ -47,8 +49,8 @@ class GeneticAlgorithm:
         for bird in self.dead_birds:
             bird.fitness /= total_fitness 
 
-    # Choosing a bird through a probability weighted by higher fitness
-    def get_bird(self):
+    # Selecting a parent through a probability distribution weighted by fitness
+    def get_parent(self):
         idx = 0
         r = np.random.uniform()
         while r > 0:
@@ -61,42 +63,50 @@ class GeneticAlgorithm:
 
     #Below Function returns the child after the crossover(50%) and the mutation.
     def crossover_1(self):
-        parent1 = self.get_bird()
-        p1_dims = parent1.nn.shape()
-
-        parent2 = self.get_bird()
-        p2_dims = parent2.nn.shape()
-
-        w_input_p1 = parent1.nn.weights['input']
-        w_input_p2 = parent2.nn.weights['input']
-        w_hidden_p1 = parent1.nn.weights['hidden']
-        w_hidden_p2 = parent2.nn.weights['hidden']
+        p1 = self.get_parent()
+        p2 = self.get_parent()
+        dims = p1.nn.shape()
 
         # First half of parent2 is assigned to parent1.
-        w_input_p1[p1_dims[0]//2:p1_dims[0]] = w_input_p2[p2_dims[0]//2:p2_dims[0]]
-        w_hidden_p1[p1_dims[1]//2:p1_dims[1]] = w_hidden_p2[p2_dims[1]//2:p2_dims[1]]
+        p1.nn.weights['input'][dims[0]//2:dims[0]] = deepcopy(p2.nn.weights['input'][dims[0]//2:dims[0]])
+        p1.nn.weights['hidden'][dims[1]//2:dims[1]] = deepcopy(p2.nn.weights['hidden'][dims[1]//2:dims[1]])
 
-        parent1.mutate() 
-        child = parent1
+        child = p1
+        child.mutate()
         return child
-    
-    # Crossover of 75 to 25 %, where parent 1 retains 75% of its genes
-    def crossover_2(self):
-        parent1 = self.get_bird()
-        p1_dims = parent1.nn.shape()
 
-        parent2 = self.get_bird()
-        p2_dims = parent2.nn.shape()
+    # Single-point crossover
+    def crossover_sp(self):
+        # Choosing parents and initializing dimensions
+        p1 = Bird(self.bird_img, neural_network = self.best_bird.nn)
+        p2 = self.get_parent()
+        dims = p1.nn.shape()
 
-        w_input_p1 = parent1.nn.weights['input']
-        w_input_p2 = parent2.nn.weights['input']
-        w_hidden_p1 = parent1.nn.weights['hidden']
-        w_hidden_p2 = parent2.nn.weights['hidden']
+        # Choosing a single point at random to swap genes
+        input_swap_idx = np.random.randint(0, dims[0]+1)
+        hidden_swap_idx = np.random.randint(0, dims[1]+1)
 
-        # Lower quarter of parent2 is assigned to parent1.
-        w_input_p1[p1_dims[0]//4:p1_dims[0]] = w_input_p2[p2_dims[0]//4:p2_dims[0]]
-        w_hidden_p1[p1_dims[1]//4:p1_dims[1]] = w_hidden_p2[p2_dims[1]//4:p2_dims[1]]
+        # Merging weights from both parents to create child weights
+        p1.nn.weights['input'][input_swap_idx:dims[0]] = deepcopy(p2.nn.weights['input'][input_swap_idx:dims[0]])
+        p1.nn.weights['hidden'][hidden_swap_idx:dims[1]] = deepcopy(p2.nn.weights['hidden'][hidden_swap_idx:dims[1]])
+        # Merging biases from both parents to create child biases
+        p1.nn.biases['input'][input_swap_idx:dims[0]] = deepcopy(p2.nn.biases['input'][input_swap_idx:dims[0]])
+        p1.nn.biases['hidden'][hidden_swap_idx:dims[1]] = deepcopy(p2.nn.biases['hidden'][hidden_swap_idx:dims[1]])        
 
-        parent1.mutate() 
-        child = parent1
+        child = p1
+        child.mutate() 
         return child
+
+    # Writes csv file with training data (gen numbers and scores)
+    def save_csv(self):
+        with open("training_data" + ".csv", 'w', newline='') as csv_file:
+            # Initialize headers for CSV file
+            headings = ["Generation Number", "Highest Score"]
+            headings = headings
+            # Writing headers
+            writer = csv.writer(csv_file, delimiter=',')
+            writer.writerow(headings)
+            # Writing data
+            for gen in self.prev_gens_score:
+                data = [gen, self.prev_gens_score[gen]]
+                writer.writerow(data)

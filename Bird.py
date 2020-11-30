@@ -23,13 +23,13 @@ class Bird:
         if neural_network is not None:
             self.nn = neural_network.copy()
         else:
-            self.nn = NeuralNetwork(4,8,1)          #8 changed to 4 as hidden
+            self.nn = NeuralNetwork(4,8,1)          
 
     def display(self, screen):
         screen.blit(self.img, (self.x, self.y))
 
     def jump(self):
-        if self.velocity>=0:    #When the bird moves down then only jump possible.
+        if self.velocity >= 0:    
             self.velocity = -2
     
     # Updates position parameters and derivatives
