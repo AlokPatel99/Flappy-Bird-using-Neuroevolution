@@ -18,27 +18,26 @@ class Bird:
         # Neuroevolution parameters
         self.score = 0
         self.fitness = 0
-        self.highest_live = 0 #New added
+        self.time_alive = 0
 
         if neural_network is not None:
             self.nn = neural_network.copy()
         else:
-            self.nn = NeuralNetwork(4,8,1)          #8 changed to 4 as hidden
+            self.nn = NeuralNetwork(4,8,1)          
 
     def display(self, screen):
         screen.blit(self.img, (self.x, self.y))
 
     def jump(self):
-        if self.velocity>=0:    #When the bird moves down then only jump possible.
+        if self.velocity >= 0:    
             self.velocity = -2
     
     # Updates position parameters and derivatives
     # Returns True if bird died, False if alive
     def update(self, pipe, dt):
-        self.highest_live += 1  #New added
-        # Update velocity
+        self.time_alive += 1  
+        
         self.velocity += self.gravity
-        # Update position
         self.y += self.velocity * dt
 
         if self.y <= 0:
@@ -64,6 +63,7 @@ class Bird:
     # Returns True if need to jump.
     def predict_action(self, pipe):
         inputs = []
+        # Inputs divided by max value to normalize
         inputs.append(self.y / 400)
         inputs.append(pipe.height / 400)
         inputs.append(np.maximum(0, pipe.x / 300))

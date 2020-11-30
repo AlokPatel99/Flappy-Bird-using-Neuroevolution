@@ -46,7 +46,7 @@ class NeuralNetwork:
         # Mutates a single number -- Mapped to weight and bias arrays 
         def mutation(x, rate):
             if np.random.uniform() < rate:
-                offset = np.random.uniform(-0.1,0.1);
+                offset = np.random.uniform(-0.225,0.225);
                 newx = x + offset
                 return newx
             else:

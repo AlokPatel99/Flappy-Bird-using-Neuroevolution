@@ -28,7 +28,7 @@ class Pipe:
             self.x = 288
             self.height = random.randint(50,300)
 
-            pygame.mixer.Sound.play(self.score_sound)            
+            # pygame.mixer.Sound.play(self.score_sound)            
             return 1 
         return 0 
 
