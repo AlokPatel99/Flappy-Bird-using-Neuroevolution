@@ -15,15 +15,17 @@ class Bird:
         self.velocity = 0
         self.gravity = 0.225
 
-        # Neuroevolution parameters
         self.score = 0
+
+        # Fitness parameters
         self.fitness = 0
         self.time_alive = 0
+        self.center_dist = 0
 
         if neural_network is not None:
             self.nn = neural_network.copy()
         else:
-            self.nn = NeuralNetwork(4,8,1)          
+            self.nn = NeuralNetwork(4,8,2)          
 
     def display(self, screen):
         screen.blit(self.img, (self.x, self.y))
@@ -69,11 +71,17 @@ class Bird:
         inputs.append(np.maximum(0, pipe.x / 300))
         inputs.append(self.velocity / 4)
 
-        output = self.nn.predict(inputs)
-        if output > 0.5:
+        output = self.nn.predict(inputs)[0]
+        if output[0] > output[1]:
             return True
         else:
             return False
+
+    def died(self, pipe, score):
+        self.score = score
+        # Center of pipe y 
+        pipe_y = pipe.height + pipe.gap / 2
+        self.center_dist = np.abs(self.y - pipe_y)
 
 
 

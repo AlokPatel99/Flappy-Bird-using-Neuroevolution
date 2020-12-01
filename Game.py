@@ -23,7 +23,7 @@ clock = pygame.time.Clock()
 # Initializing display and associated parameters
 screen = pygame.display.set_mode((288, 512))  
 pygame.display.set_caption('Flappy Bird')
-fps = 30
+fps = 60
 frame_skip = 5
 
 # Loading sounds
@@ -80,7 +80,7 @@ while not game_over:
     for i in range(training_speed):
         # Check for generation change
         if ga.is_gen_dead():
-            if pipe.x > 70 or ga.gen_num == -1:
+            if pipe.x > 250 or ga.gen_num == -1:
                 ga.get_next_generation()
                 ga.prev_gens_score[ga.gen_num] = score
                 print('Generation: {}\nScore: {}\n'.format(ga.gen_num, score))
@@ -99,7 +99,7 @@ while not game_over:
         for bird in ga.alive_birds:
             is_dead = bird.update(pipe, dt)
             if is_dead:
-                bird.score = score
+                bird.died(pipe, score)
                 dead_birds.append(bird)
             
         # Update dead and alive bird arrays

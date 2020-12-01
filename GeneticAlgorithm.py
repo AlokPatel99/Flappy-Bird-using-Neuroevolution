@@ -5,7 +5,7 @@ from copy import deepcopy
 from Bird import Bird
 
 class GeneticAlgorithm:
-    def __init__(self, population_size = 25):
+    def __init__(self, population_size = 25, fitness_type = "complex", crossover_type = "fixed"):
         self.bird_img = pygame.image.load('Images/redbird-upflap.png')
 
         self.alive_birds = []
@@ -16,6 +16,9 @@ class GeneticAlgorithm:
 
         self.gen_num = -1        
         self.prev_gens_score = {} 
+        
+        self.fitness_type = fitness_type
+        self.crossover_type = crossover_type
 
         self.initialize_population()
 
@@ -27,16 +30,34 @@ class GeneticAlgorithm:
         return len(self.alive_birds) == 0
 
     def get_next_generation(self):
-        self.calculate_fitness()
+        # Calculating fitness based on type
+        if self.fitness_type == "simple":
+            self.calc_fitness_simple()
+        elif self.fitness_type == "complex":
+            self.calc_fitness_complex()
+            for i in range(25):
+                # Add top 5 to next generation 
+                if i < 5:
+                    self.alive_birds.append(self.dead_birds[i])
+                # Add 25 of the best bird to next generation
+                self.alive_birds.append(Bird(self.bird_img, self.best_bird.nn))
 
-        for i in range(self.pop_size):
-            self.alive_birds.append(self.crossover_1())   
+        # Creating new population based on crossover
+        if self.crossover_type == "none":
+            for i in range(self.pop_size - len(self.alive_birds)):
+                self.alive_birds.append(self.no_crossover()) 
+        elif self.crossover_type == "fixed":  
+            for i in range(self.pop_size - len(self.alive_birds)):
+                self.alive_birds.append(self.crossover_fp())   
+        elif self.crossover_type == "variable":  
+            for i in range(self.pop_size - len(self.alive_birds)):
+                self.alive_birds.append(self.crossover_vp())           
 
         self.dead_birds = [] 
         self.gen_num += 1
         
-    # Calculates and normalizes the fitness score of birds
-    def calculate_fitness(self):
+    # Calculates and normalizes the fitness score of birds using the time alive
+    def calc_fitness_simple(self):
         total_fitness = 0
 
         for bird in self.dead_birds:
@@ -48,6 +69,23 @@ class GeneticAlgorithm:
         # Normalize bird fitness values
         for bird in self.dead_birds:
             bird.fitness /= total_fitness 
+
+    # Calculates and normalizes the fitness score of birds using the time alive + center dist.
+    def calc_fitness_complex(self):
+        total_fitness = 0
+
+        for bird in self.dead_birds:
+            bird.fitness = bird.time_alive - bird.center_dist
+            total_fitness += bird.fitness
+            if bird.score > self.best_bird.score:  
+                self.best_bird = bird  
+
+        # Normalize bird fitness values
+        for bird in self.dead_birds:
+            bird.fitness /= total_fitness 
+        
+        # Sort from high to low
+        self.dead_birds.sort(key=lambda x: x.fitness, reverse=True)
 
     # Selecting a parent through a probability distribution weighted by fitness
     def get_parent(self):
@@ -61,8 +99,14 @@ class GeneticAlgorithm:
         parent = Bird(self.bird_img, neural_network = bird.nn)
         return parent
 
-    #Below Function returns the child after the crossover(50%) and the mutation.
-    def crossover_1(self):
+    # No crossover used, basic selection and then mutation 
+    def no_crossover(self):
+        child = self.get_parent()
+        child.mutate()
+        return child
+
+    # Fixed-point crossover (at halfway point)
+    def crossover_fp(self):
         p1 = self.get_parent()
         p2 = self.get_parent()
         dims = p1.nn.shape()
@@ -70,15 +114,18 @@ class GeneticAlgorithm:
         # First half of parent2 is assigned to parent1.
         p1.nn.weights['input'][dims[0]//2:dims[0]] = deepcopy(p2.nn.weights['input'][dims[0]//2:dims[0]])
         p1.nn.weights['hidden'][dims[1]//2:dims[1]] = deepcopy(p2.nn.weights['hidden'][dims[1]//2:dims[1]])
+        # Merging biases from both parents to create child biases
+        p1.nn.biases['input'][dims[0]//2:dims[0]] = deepcopy(p2.nn.biases['input'][dims[0]//2:dims[0]])
+        p1.nn.biases['hidden'][dims[1]//2:dims[1]] = deepcopy(p2.nn.biases['hidden'][dims[1]//2:dims[1]])   
 
         child = p1
         child.mutate()
         return child
 
-    # Single-point crossover
-    def crossover_sp(self):
+    # Variable-point crossover
+    def crossover_vp(self):
         # Choosing parents and initializing dimensions
-        p1 = Bird(self.bird_img, neural_network = self.best_bird.nn)
+        p1 = self.get_parent()
         p2 = self.get_parent()
         dims = p1.nn.shape()
 

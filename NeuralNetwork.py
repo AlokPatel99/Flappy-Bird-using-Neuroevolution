@@ -18,20 +18,24 @@ class NeuralNetwork:
 
     def initialize_layers(self):
         # Input layer
-        self.weights['input'] = np.random.randn(self.input_nodes, self.hidden_nodes)
-        self.biases['input'] = np.random.randn(1, self.hidden_nodes)
+        self.weights['input'] = np.random.uniform(-1,1,(self.input_nodes, self.hidden_nodes))
+        self.biases['input'] = np.random.uniform(-1,1,(1, self.hidden_nodes))
 
         # Hidden layer
-        self.weights['hidden'] = np.random.randn(self.hidden_nodes, self.output_nodes)
-        self.biases['hidden'] = np.random.randn(1, self.output_nodes)        
+        self.weights['hidden'] = np.random.uniform(-1,1,(self.hidden_nodes, self.output_nodes))
+        self.biases['hidden'] = np.random.uniform(-1,1,(1, self.output_nodes))
 
     def predict(self, x):
         x1 = np.dot(x,self.weights['input']) + self.biases['input']
-        x1 = self.relu(x1)
+        x1 = self.tanh(x1)
+        # x1 = self.relu(x1)
 
         x2 = x1.dot(self.weights['hidden']) + self.biases['hidden']
         y = self.sigmoid(x2)
         return y
+
+    def tanh(self, x):
+        return np.tanh(x)
 
     def relu(self, x):
         return np.maximum(0, x)
@@ -46,7 +50,7 @@ class NeuralNetwork:
         # Mutates a single number -- Mapped to weight and bias arrays 
         def mutation(x, rate):
             if np.random.uniform() < rate:
-                offset = np.random.uniform(-0.225,0.225);
+                offset = np.random.normal(0, 0.1)
                 newx = x + offset
                 return newx
             else:
