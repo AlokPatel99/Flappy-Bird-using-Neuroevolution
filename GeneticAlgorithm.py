@@ -5,7 +5,7 @@ from copy import deepcopy
 from Bird import Bird
 
 class GeneticAlgorithm:
-    def __init__(self, population_size = 25, fitness_type = "complex", crossover_type = "fixed"):
+    def __init__(self, population_size = 250, fitness_type = "complex", crossover_type = "variable", activation_type = "tanh"):
         self.bird_img = pygame.image.load('Images/redbird-upflap.png')
 
         self.alive_birds = []
@@ -19,12 +19,13 @@ class GeneticAlgorithm:
         
         self.fitness_type = fitness_type
         self.crossover_type = crossover_type
+        self.activation_type = activation_type
 
         self.initialize_population()
 
     def initialize_population(self):
         for i in range(self.pop_size):
-            self.alive_birds.append(Bird(self.bird_img))
+            self.alive_birds.append(Bird(self.bird_img, activation_type=self.activation_type))
 
     def is_gen_dead(self):
         return len(self.alive_birds) == 0
@@ -40,7 +41,7 @@ class GeneticAlgorithm:
                 if i < 5:
                     self.alive_birds.append(self.dead_birds[i])
                 # Add 25 of the best bird to next generation
-                self.alive_birds.append(Bird(self.bird_img, self.best_bird.nn))
+                self.alive_birds.append(Bird(self.bird_img, self.best_bird.nn, activation_type=self.activation_type))
 
         # Creating new population based on crossover
         if self.crossover_type == "none":
@@ -96,7 +97,7 @@ class GeneticAlgorithm:
             idx += 1
         bird = self.dead_birds[idx-1]
         
-        parent = Bird(self.bird_img, neural_network = bird.nn)
+        parent = Bird(self.bird_img, neural_network = bird.nn, activation_type=self.activation_type)
         return parent
 
     # No crossover used, basic selection and then mutation 

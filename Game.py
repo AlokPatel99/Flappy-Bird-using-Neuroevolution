@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Nov 17 21:19:09 2020
-AI Project
+Flappy Bird Using Neuroevolution
 @authors: Rahul Behal and Alok Patel
 """ 
 
@@ -12,8 +12,6 @@ import sys
 import time 
 import matplotlib.pyplot as plt
 from Pipe import Pipe
-from Bird import Bird
-from NeuralNetwork import NeuralNetwork
 from GeneticAlgorithm import GeneticAlgorithm
 
 # Initialising the modules in pygame
@@ -47,9 +45,18 @@ speed_up_btn = pygame.transform.scale(speed_up_btn, btn_size)
 slow_down_btn = pygame.image.load('Images/slow-down.png')  
 slow_down_btn = pygame.transform.scale(slow_down_btn, btn_size)
 
+# Learning functions
+fitness_type = "complex"
+crossover_type = "variable"
+activation_type = "tanh"
+
 # Initializing main objects
 pipe = Pipe()
-ga = GeneticAlgorithm(250)  
+ga = GeneticAlgorithm(
+                      fitness_type=fitness_type,
+                      crossover_type=crossover_type,
+                      activation_type=activation_type
+                     )  
 
 # Initialize score and other
 score = 0

@@ -2,10 +2,12 @@ import numpy as np
 from copy import deepcopy
 
 class NeuralNetwork:
-    def __init__(self, input_nodes, hidden_nodes, output_nodes, weights = None, biases = None): 
+    def __init__(self, input_nodes, hidden_nodes, output_nodes, weights = None, biases = None, activation_type="tanh"): 
         self.input_nodes = input_nodes
         self.hidden_nodes = hidden_nodes
         self.output_nodes = output_nodes 
+        
+        self.activation_type = activation_type
 
         if weights is not None and biases is not None:
             self.weights = weights
@@ -27,8 +29,11 @@ class NeuralNetwork:
 
     def predict(self, x):
         x1 = np.dot(x,self.weights['input']) + self.biases['input']
-        x1 = self.tanh(x1)
-        # x1 = self.relu(x1)
+        
+        if self.activation_type == "tanh":
+            x1 = self.tanh(x1)
+        elif self.activation_type == "relu":
+            x1 = self.relu(x1)
 
         x2 = x1.dot(self.weights['hidden']) + self.biases['hidden']
         y = self.sigmoid(x2)
@@ -71,4 +76,4 @@ class NeuralNetwork:
         weights = deepcopy(self.weights)
         biases = deepcopy(self.biases)
         
-        return NeuralNetwork(i,h,o,weights,biases)
+        return NeuralNetwork(i,h,o,weights,biases,activation_type=self.activation_type)

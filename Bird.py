@@ -2,7 +2,7 @@ import pygame
 from NeuralNetwork import *
 
 class Bird:
-    def __init__(self, img, neural_network=None):
+    def __init__(self, img, neural_network=None, activation_type = "tanh"):
         # Display parameters
         self.img = img
         self.width = self.img.get_width()
@@ -25,7 +25,7 @@ class Bird:
         if neural_network is not None:
             self.nn = neural_network.copy()
         else:
-            self.nn = NeuralNetwork(4,8,2)          
+            self.nn = NeuralNetwork(4,8,2,activation_type=activation_type)          
 
     def display(self, screen):
         screen.blit(self.img, (self.x, self.y))
